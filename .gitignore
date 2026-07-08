@@ -1,0 +1,36 @@
+# ─── Secrets ───────────────────────────────────────────────────────────────
+.env
+*.env.*
+
+# ─── Utility / One-off Scripts (not part of production) ────────────────────
+dry_run_feed.py
+generate_unresolved_list.py
+
+# ─── Generated Data Files ──────────────────────────────────────────────────
+sector_database.json
+resolved_sector_database.json
+unresolved_stocks.txt
+processed_news.json
+
+# ─── Python Cache ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ─── Virtual Environments ──────────────────────────────────────────────────
+venv/
+.venv/
+env/
+
+# ─── Logs ──────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── OS Artifacts ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
