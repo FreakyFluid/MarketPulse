@@ -45,7 +45,9 @@ class CatalystMonitor:
         self.ist = pytz.timezone('Asia/Kolkata')
         self.broadcaster = TelegramBroadcaster()
         self.processed_hashes = self._load_cache()
-        self.last_briefing_date = None
+        self.last_morning_briefing_date = None
+        self.last_midday_briefing_date = None
+        self.last_evening_briefing_date = None
 
     def _load_cache(self) -> set:
         """Loads already processed headline hashes from local JSON cache."""
@@ -211,7 +213,7 @@ class CatalystMonitor:
             "SP500": "^GSPC", "NSDQ": "^IXIC", "DOW": "^DJI",
             "GIFTNFT": "^NSEI", "NIKKEI": "^N225", "HSENG": "^HSI",
             "FTSE": "^FTSE", "DAX": "^GDAXI",
-            "BRENT": "BZ=F", "GOLD": "GC=F", "COPPER": "HG=F",
+            "BRENT": "BZ=F", "GOLD": "GC=F", "SILVER": "SI=F", "COPPER": "HG=F",
             "USDINR": "INR=X"
         }
         
@@ -239,7 +241,7 @@ class CatalystMonitor:
                 return f"{symbol_str} N/A"
             sign = "+" if val["pct"] >= 0 else ""
             arrow = "▲" if val["pct"] >= 0 else "▼"
-            prefix = "$" if name in ["BRENT", "GOLD"] else ""
+            prefix = "$" if name in ["BRENT", "GOLD", "SILVER", "COPPER"] else ""
             return f"{symbol_str} {prefix}{val['price']} ({sign}{val['pct']}%) {arrow}"
 
         # Generate Morning Bias dynamically from actual fetched data
@@ -271,13 +273,128 @@ class CatalystMonitor:
             f"🇺🇸 {fmt('SP500', 'S&P500')} | 🇺🇸 {fmt('NSDQ', 'NSDQ')} | 🇺🇸 {fmt('DOW', 'DOW')}\n"
             f"🇮🇳 {fmt('GIFTNFT', 'GIFTNFT')} | 🇯🇵 {fmt('NIKKEI', 'NIKKEI')} | 🇭🇰 {fmt('HSENG', 'HSENG')}\n"
             f"🇬🇧 {fmt('FTSE', 'FTSE')} | 🇩🇪 {fmt('DAX', 'DAX')}\n"
-            f"🛢️ {fmt('BRENT', 'BRENT')} | 🟡 {fmt('GOLD', 'GOLD')} | 🪨 {fmt('COPPER', 'COPPER')}\n"
+            f"🛢️ {fmt('BRENT', 'BRENT')} | 🟡 {fmt('GOLD', 'GOLD')} | ⚪ {fmt('SILVER', 'SILVER')} | 🪨 {fmt('COPPER', 'COPPER')}\n"
             f"💵 {fmt('USDINR', 'USDINR')}\n\n"
             f"💡 <b>BIAS:</b> {bias_str}"
         )
 
         self.broadcaster.send_raw_message(body)
         print("[✅] Morning briefing broadcasted successfully.")
+
+    def send_midday_briefing(self):
+        """Fetches indices and commodities and broadcasts a mid-day market check."""
+        print("[*] Compiling Mid-day Market Update...")
+        tickers = {
+            "NIFTY": "^NSEI", "BANKNIFTY": "^NSEBANK",
+            "BRENT": "BZ=F", "GOLD": "GC=F", "SILVER": "SI=F", "COPPER": "HG=F",
+            "USDINR": "INR=X"
+        }
+        
+        data = {}
+        for name, sym in tickers.items():
+            try:
+                t = yf.Ticker(sym)
+                hist = t.history(period="2d")
+                if not hist.empty and len(hist) >= 2:
+                    c_prev = hist['Close'].iloc[-2]
+                    c_curr = hist['Close'].iloc[-1]
+                    pct = ((c_curr - c_prev) / c_prev) * 100
+                    data[name] = {"price": round(c_curr, 2), "pct": round(pct, 2)}
+                elif not hist.empty:
+                    data[name] = {"price": round(hist['Close'].iloc[-1], 2), "pct": 0.0}
+                else:
+                    data[name] = {"price": "N/A", "pct": 0.0}
+            except Exception as e:
+                print(f"    [!] Error fetching {name} ({sym}): {e}")
+                data[name] = {"price": "N/A", "pct": 0.0}
+
+        def fmt(name, symbol_str):
+            val = data.get(name, {"price": "N/A", "pct": 0.0})
+            if val["price"] == "N/A":
+                return f"{symbol_str} N/A"
+            sign = "+" if val["pct"] >= 0 else ""
+            arrow = "▲" if val["pct"] >= 0 else "▼"
+            prefix = "$" if name in ["BRENT", "GOLD", "SILVER", "COPPER"] else ""
+            return f"{symbol_str} {prefix}{val['price']} ({sign}{val['pct']}%) {arrow}"
+
+        # Fetch index values for breadth/momentum overview
+        nifty = data.get("NIFTY", {"pct": 0.0})
+        banknifty = data.get("BANKNIFTY", {"pct": 0.0})
+        
+        bias_str = "Neutral momentum."
+        if nifty["pct"] >= 0.5:
+            bias_str = "Strong bullish momentum in Nifty."
+        elif nifty["pct"] <= -0.5:
+            bias_str = "Bearish pressure on indices."
+        elif banknifty["pct"] >= 0.5:
+            bias_str = "Banking sector driving Nifty support."
+        elif banknifty["pct"] <= -0.5:
+            bias_str = "Banking drag keeping market under pressure."
+
+        body = (
+            "📊 <b>MID-DAY MARKET UPDATE — 13:00 IST</b> 🕒\n\n"
+            f"🇮🇳 {fmt('NIFTY', 'NIFTY 50')} | 🇮🇳 {fmt('BANKNIFTY', 'BANK NIFTY')}\n\n"
+            f"🛢️ {fmt('BRENT', 'BRENT')} | 🟡 {fmt('GOLD', 'GOLD')} | ⚪ {fmt('SILVER', 'SILVER')}\n"
+            f"🪨 {fmt('COPPER', 'COPPER')} | 💵 {fmt('USDINR', 'USDINR')}\n\n"
+            f"💡 <b>MID-DAY COMMENTARY:</b> {bias_str}"
+        )
+
+        self.broadcaster.send_raw_message(body)
+        print("[✅] Mid-day briefing broadcasted successfully.")
+
+    def send_evening_briefing(self):
+        """Fetches indices and commodities and broadcasts a post-market summary."""
+        print("[*] Compiling Evening Post-Market Briefing...")
+        tickers = {
+            "NIFTY": "^NSEI", "BANKNIFTY": "^NSEBANK",
+            "BRENT": "BZ=F", "GOLD": "GC=F", "SILVER": "SI=F", "COPPER": "HG=F",
+            "USDINR": "INR=X"
+        }
+        
+        data = {}
+        for name, sym in tickers.items():
+            try:
+                t = yf.Ticker(sym)
+                hist = t.history(period="2d")
+                if not hist.empty and len(hist) >= 2:
+                    c_prev = hist['Close'].iloc[-2]
+                    c_curr = hist['Close'].iloc[-1]
+                    pct = ((c_curr - c_prev) / c_prev) * 100
+                    data[name] = {"price": round(c_curr, 2), "pct": round(pct, 2)}
+                elif not hist.empty:
+                    data[name] = {"price": round(hist['Close'].iloc[-1], 2), "pct": 0.0}
+                else:
+                    data[name] = {"price": "N/A", "pct": 0.0}
+            except Exception as e:
+                print(f"    [!] Error fetching {name} ({sym}): {e}")
+                data[name] = {"price": "N/A", "pct": 0.0}
+
+        def fmt(name, symbol_str):
+            val = data.get(name, {"price": "N/A", "pct": 0.0})
+            if val["price"] == "N/A":
+                return f"{symbol_str} N/A"
+            sign = "+" if val["pct"] >= 0 else ""
+            arrow = "▲" if val["pct"] >= 0 else "▼"
+            prefix = "$" if name in ["BRENT", "GOLD", "SILVER", "COPPER"] else ""
+            return f"{symbol_str} {prefix}{val['price']} ({sign}{val['pct']}%) {arrow}"
+
+        nifty = data.get("NIFTY", {"pct": 0.0})
+        closing_sentiment = "flat"
+        if nifty["pct"] >= 0.5:
+            closing_sentiment = "bullish"
+        elif nifty["pct"] <= -0.5:
+            closing_sentiment = "bearish"
+
+        body = (
+            "🏁 <b>POST-MARKET WRAP-UP — 17:45 IST</b> 💼\n\n"
+            f"🇮🇳 {fmt('NIFTY', 'NIFTY 50')} | 🇮🇳 {fmt('BANKNIFTY', 'BANK NIFTY')}\n\n"
+            f"🛢️ {fmt('BRENT', 'BRENT')} | 🟡 {fmt('GOLD', 'GOLD')} | ⚪ {fmt('SILVER', 'SILVER')}\n"
+            f"🪨 {fmt('COPPER', 'COPPER')} | 💵 {fmt('USDINR', 'USDINR')}\n\n"
+            f"📝 <b>WRAP:</b> Nifty closed the session on a {closing_sentiment} note at {data.get('NIFTY', {}).get('price', 'N/A')} ({'+' if nifty['pct'] >= 0 else ''}{nifty['pct']}%)."
+        )
+
+        self.broadcaster.send_raw_message(body)
+        print("[✅] Evening briefing broadcasted successfully.")
 
     def run_forever(self):
         """Infinite loop driving the daemon process."""
@@ -288,17 +405,38 @@ class CatalystMonitor:
         
         while True:
             try:
-                # 8:15 AM Briefing Trigger (Mon-Fri only)
                 now = datetime.now(self.ist)
-                if now.hour == 8 and now.minute == 15:
-                    current_date = now.strftime("%Y-%m-%d")
-                    if self.last_briefing_date != current_date:
-                        if now.weekday() < 5: # Monday = 0, Friday = 4
+                current_date = now.strftime("%Y-%m-%d")
+                weekday = now.weekday()
+                
+                # Check for briefings only on weekdays (Mon-Fri)
+                if weekday < 5:
+                    # 8:15 AM Morning Briefing Trigger
+                    if now.hour == 8 and now.minute == 15:
+                        if self.last_morning_briefing_date != current_date:
                             try:
                                 self.send_morning_briefing()
                             except Exception as e:
                                 print(f"[❌] Error sending morning briefing: {e}")
-                        self.last_briefing_date = current_date
+                            self.last_morning_briefing_date = current_date
+
+                    # 1:00 PM Mid-day Briefing Trigger
+                    elif now.hour == 13 and now.minute == 0:
+                        if self.last_midday_briefing_date != current_date:
+                            try:
+                                self.send_midday_briefing()
+                            except Exception as e:
+                                print(f"[❌] Error sending mid-day briefing: {e}")
+                            self.last_midday_briefing_date = current_date
+
+                    # 5:45 PM Evening Briefing Trigger
+                    elif now.hour == 17 and now.minute == 45:
+                        if self.last_evening_briefing_date != current_date:
+                            try:
+                                self.send_evening_briefing()
+                            except Exception as e:
+                                print(f"[❌] Error sending evening briefing: {e}")
+                            self.last_evening_briefing_date = current_date
 
                 self.process_feeds()
             except Exception as e:
