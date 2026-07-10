@@ -6,7 +6,7 @@ import re
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 GROWW_DB_PATH = os.path.join(BASE_DIR, "sector_database.json")
 RESOLVED_DB_PATH = os.path.join(BASE_DIR, "resolved_sector_database.json")
-INSTRUMENTS_DB_PATH = "/home/vinnie/upstox-mcp/instruments.db"
+INSTRUMENTS_DB_PATH = os.path.expanduser("~/upstox-mcp/instruments.db")
 
 def clean_company_name(name: str) -> str:
     """Cleans up names to maximize matching probability in SQL."""
