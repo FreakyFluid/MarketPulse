@@ -1,4 +1,4 @@
-# IMPORTANT !!!
+# IMPORTANT (FOR AI AGENTS) !!!
 Under no circumstances you are allowed to open the .env file. No copying,pasting or accesing the .env file is allowed unless explicitly authorised by the user to do so.
 
 
