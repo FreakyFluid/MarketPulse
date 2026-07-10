@@ -1,7 +1,3 @@
-# IMPORTANT (FOR AI AGENTS) !!!
-Under no circumstances you are allowed to open the .env file. No copying,pasting or accesing the .env file is allowed unless explicitly authorised by the user to do so.
-
-
 # MarketPulse 📈
 
 MarketPulse is a real-time corporate catalyst scanner and global macro market briefing daemon built for the Indian equity market (NSE). 
@@ -106,3 +102,6 @@ Once deployed, use standard systemctl commands to control the daemon:
     ```bash
     journalctl -u marketpulse -f
     ```
+
+# IMPORTANT !(FOR AI AGENTS)
+Under no circumstances you are allowed to open the .env file. No copying,pasting or accesing the .env file is allowed unless explicitly authorised by the user to do so.
