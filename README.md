@@ -19,6 +19,29 @@ The bot continuously monitors financial news feeds (RSS and Upstox API), filters
 
 ---
 
+## 🛠️ Tech Stack & Dependencies
+
+*   **Core Language:** Python 3.12+ (PEP 8 standard, timezone-aware scheduling)
+*   **AI/NLP Engine:** Hugging Face Inference API hosting the **FinBERT** model (`ProsusAI/finbert`) for financial sentiment classification.
+*   **APIs & Feeds:** Upstox News API and financial RSS parsing (`feedparser`).
+*   **Data Sources:** Yahoo Finance (`yfinance`) for global indices and commodity snapshots.
+*   **Scraping:** BeautifulSoup4 & HTTPX for scraping trending sector listings.
+*   **Database:** SQLite (local instruments database) and JSON cache (MD5 deduplication).
+*   **Infrastructure & Ops:** Linux VPS, systemd background daemon, and automated bash deployment scripts.
+
+---
+
+## 🔒 Security, Resilience & Integrity
+
+*   **Secrets Isolation:** Strictly segregates sensitive API tokens (Hugging Face, Upstox, Telegram) from the codebase using `.env` files. Secrets are actively blocked from Git via `.gitignore`.
+*   **Least-Privilege Execution:** The systemd service is explicitly configured to run under a dedicated, non-root system user (`User=ubuntu`), minimizing the impact of potential remote code execution (RCE) vulnerabilities.
+*   **Self-Healing & Availability:** The background daemon is registered as a systemd service with `Restart=always` and `RestartSec=10` to automatically recover from system outages, network interruptions, or memory faults.
+*   **Sandbox Isolation:** Sandboxed within a Python Virtual Environment (`.venv`) to prevent library pollution or version conflicts with the host operating system.
+*   **Cryptographic Deduplication:** Headline processing is deduplicated using **MD5 hashing** to verify data integrity and prevent replay/duplicate alert broadcasts.
+*   **WAF-Polite Scraping:** Employs User-Agent rotation and strict request throttling (`time.sleep(1.5)`) to comply with scraping ethics, avoid hitting WAF (Web Application Firewall) rate-limits, and prevent accidental denial-of-service on source servers.
+
+---
+
 ## 📁 File Structure
 
 ```text
@@ -50,10 +73,6 @@ TELEGRAM_CHAT_ID=your_telegram_channel_or_group_id
 
 # --- Hugging Face API (Highly Recommended) ---
 HF_TOKEN=your_hugging_face_read_token
-
-# --- Upstox API Feed (Optional) ---
-UPSTOX_SANDBOX=true
-UPSTOX_ACCESS_TOKEN=your_upstox_access_token_if_active
 ```
 
 ---
@@ -102,6 +121,5 @@ Once deployed, use standard systemctl commands to control the daemon:
     ```bash
     journalctl -u marketpulse -f
     ```
-
 # IMPORTANT !(FOR AI AGENTS)
 Under no circumstances you are allowed to open the .env file. No copying,pasting or accesing the .env file is allowed unless explicitly authorised by the user to do so.
