@@ -12,9 +12,18 @@ def clean_company_name(name: str) -> str:
     """Cleans up names to maximize matching probability in SQL."""
     name = name.upper()
     # Strip common suffixes and characters
-    name = re.sub(r"\b(LTD|LIMITED|INDIA|INDUSTRIES|CORP|CORPORATION|BK|BANK|INDS|SERVICES|TECHNOLOGIES|HOLDINGS|INFRASTRUCTURE)\b", "", name)
+    name = re.sub(r"\b(LTD|LIMITED|CORP|CORPORATION|INDS|INDUSTRIES|INDIA)\b", "", name)
     name = re.sub(r"[^\w\s]", "", name)
     return " ".join(name.split())
+
+# Specific manual overrides for demerged or tricky companies
+MANUAL_OVERrides = {
+    "TATA MOTORS PASSENGER VEHICLES": "TMPV.NS",
+    "TATA MOTORS COMMERCIAL VEHICLES": "TMCV.NS",
+    "TATA MOTORS": "TMCV.NS",
+    "LT TECHNOLOGY SERVICES": "LTTS.NS",
+    "ORACLE FINANCIAL SERVICES SOFTWARE": "OFSS.NS"
+}
 
 def resolve_tickers():
     if not os.path.exists(GROWW_DB_PATH):
@@ -48,12 +57,23 @@ def resolve_tickers():
             # Step 1: Direct Name Match
             cleaned = clean_company_name(name)
             
+            # Check manual overrides first
+            if cleaned in MANUAL_OVERrides:
+                ticker = MANUAL_OVERrides[cleaned]
+                total_resolved += 1
+                resolved_companies.append({
+                    "name": name,
+                    "ticker": ticker
+                })
+                continue
+                
             # Try a progressive SQL search (starts-with, contains, then fallback matches)
             ticker = None
+            row = None
             
             # Query 1: Exact Name prefix match (fastest and most accurate)
             cursor.execute(
-                "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND name LIKE ? LIMIT 1",
+                "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND instrument_type IN ('EQ', 'BE', 'SM', 'ST') AND name LIKE ? LIMIT 1",
                 (f"{cleaned}%",)
             )
             row = cursor.fetchone()
@@ -61,7 +81,7 @@ def resolve_tickers():
             # Query 2: Try exact name parts matching
             if not row:
                 cursor.execute(
-                    "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND name LIKE ? LIMIT 1",
+                    "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND instrument_type IN ('EQ', 'BE', 'SM', 'ST') AND name LIKE ? LIMIT 1",
                     (f"%{cleaned}%",)
                 )
                 row = cursor.fetchone()
@@ -70,7 +90,7 @@ def resolve_tickers():
             if not row:
                 slug_keywords = clean_company_name(slug.replace('-', ' '))
                 cursor.execute(
-                    "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND name LIKE ? LIMIT 1",
+                    "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND instrument_type IN ('EQ', 'BE', 'SM', 'ST') AND name LIKE ? LIMIT 1",
                     (f"%{slug_keywords}%",)
                 )
                 row = cursor.fetchone()
@@ -82,7 +102,7 @@ def resolve_tickers():
                     first_two = f"{words[0]} {words[1]}"
                     if first_two not in ["TATA", "ADANI", "RELIANCE", "BIRLA", "JINDAL"]:
                         cursor.execute(
-                            "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND name LIKE ? LIMIT 1",
+                            "SELECT trading_symbol FROM instruments WHERE segment = 'NSE_EQ' AND instrument_type IN ('EQ', 'BE', 'SM', 'ST') AND name LIKE ? LIMIT 1",
                             (f"{first_two}%",)
                         )
                         row = cursor.fetchone()

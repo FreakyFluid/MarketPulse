@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import json
+import html
 import hashlib
 import feedparser
 import httpx
@@ -26,6 +27,13 @@ RSS_FEEDS = {
     "Economic Times - Stocks": "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms",
     "Economic Times - Markets": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
     "Business Standard - Markets": "https://www.business-standard.com/rss/markets-106.rss"
+}
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Connection": "keep-alive"
 }
 
 UPSTOX_NEWS_URL = "https://api.upstox.com/v2/news"
@@ -67,7 +75,14 @@ class CatalystMonitor:
         headlines = []
         for name, url in RSS_FEEDS.items():
             try:
-                feed = feedparser.parse(url)
+                with httpx.Client(headers=HEADERS, follow_redirects=True) as client:
+                    response = client.get(url, timeout=15.0)
+                    if response.status_code == 200:
+                        feed = feedparser.parse(response.content)
+                    else:
+                        print(f"[!] Error fetching RSS feed '{name}': HTTP {response.status_code}")
+                        continue
+                
                 for entry in feed.entries:
                     headline = entry.get("title", "")
                     link = entry.get("link", "")
@@ -141,7 +156,7 @@ class CatalystMonitor:
         print(f"    Found {len(new_items)} new headlines. Processing...")
         
         for item in new_items:
-            headline = item["headline"]
+            headline = html.unescape(html.unescape(item["headline"]))
             link = item["link"]
             h_hash = item["hash"]
             

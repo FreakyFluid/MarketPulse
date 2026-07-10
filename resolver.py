@@ -65,7 +65,7 @@ class CatalystResolver:
                 ticker = s["ticker"]
                 
                 # Strip common corporate suffixes to get clean matching names
-                clean_name = re.sub(r"\b(LTD|LIMITED|INDIA|INDUSTRIES|CORP|CORPORATION|BK|BANK|INDS|SERVICES|TECHNOLOGIES|HOLDINGS|INFRASTRUCTURE)\b", "", name)
+                clean_name = re.sub(r"\b(LTD|LIMITED|CORP|CORPORATION|INDS|INDUSTRIES|INDIA)\b", "", name)
                 clean_name = " ".join(clean_name.split()).strip()
                 
                 if len(clean_name) > 3: # Ignore tiny names to prevent false positive matches
