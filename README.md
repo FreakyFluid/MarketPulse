@@ -1,5 +1,7 @@
 # MarketPulse 📈
 
+![MarketPulse Banner](marketpulse_lineart_v2.jpg)
+
 MarketPulse is a real-time corporate catalyst scanner and global macro market briefing daemon built for the Indian equity market (NSE). 
 
 The bot continuously monitors financial news feeds (RSS), filters out noise, maps unstructured headlines to specific stock tickers or sectors, performs sentiment analysis using natural language processing (NLP), and broadcasts instant alerts to Telegram. Additionally, it compiles and sends a daily global macro briefing.
