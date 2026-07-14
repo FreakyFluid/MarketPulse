@@ -25,7 +25,17 @@ RSS_FEEDS = {
     "MoneyControl - Markets": "https://www.moneycontrol.com/rss/marketreports.xml",
     "MoneyControl - Business": "https://www.moneycontrol.com/rss/business.xml",
     "Economic Times - Stocks": "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms",
-    "Economic Times - Markets": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"
+    "Economic Times - Markets": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+    "Livemint - News": "https://www.livemint.com/rss/news",
+    "Livemint - Markets": "https://www.livemint.com/rss/markets",
+    "RBI - Press Releases": "https://rbi.org.in/pressreleases_rss.xml",
+    "NSE - Corporate Actions": "https://nsearchives.nseindia.com/content/RSS/Corporate_action.xml",
+    "NSE - Board Meetings": "https://nsearchives.nseindia.com/content/RSS/Board_Meetings.xml",
+    "NSE - Insider Trading": "https://nsearchives.nseindia.com/content/RSS/Insider_Trading.xml",
+    "NSE - Circulars": "https://nsearchives.nseindia.com/content/RSS/Circulars.xml",
+    "BSE - Financial Results": "https://beta.bseindia.com/Data/XML/FinancialResultsFeed.xml",
+    "BSE - Insider Trading": "https://beta.bseindia.com/Data/XML/InsiderTradingFeed.xml",
+    "BSE - Board Meetings": "https://beta.bseindia.com/Data/XML/BoardMeetingsFeed.xml"
 }
 
 HEADERS = {
