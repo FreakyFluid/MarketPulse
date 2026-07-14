@@ -25,8 +25,7 @@ RSS_FEEDS = {
     "MoneyControl - Markets": "https://www.moneycontrol.com/rss/marketreports.xml",
     "MoneyControl - Business": "https://www.moneycontrol.com/rss/business.xml",
     "Economic Times - Stocks": "https://economictimes.indiatimes.com/markets/stocks/rssfeeds/2146842.cms",
-    "Economic Times - Markets": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
-    "Business Standard - Markets": "https://www.business-standard.com/rss/markets-106.rss"
+    "Economic Times - Markets": "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"
 }
 
 HEADERS = {
