@@ -2,7 +2,7 @@
 
 MarketPulse is a real-time corporate catalyst scanner and global macro market briefing daemon built for the Indian equity market (NSE). 
 
-The bot continuously monitors financial news feeds (RSS and Upstox API), filters out noise, maps unstructured headlines to specific stock tickers or sectors, performs sentiment analysis using natural language processing (NLP), and broadcasts instant alerts to Telegram. Additionally, it compiles and sends a daily global macro briefing.
+The bot continuously monitors financial news feeds (RSS), filters out noise, maps unstructured headlines to specific stock tickers or sectors, performs sentiment analysis using natural language processing (NLP), and broadcasts instant alerts to Telegram. Additionally, it compiles and sends a daily global macro briefing.
 
 ---
 
@@ -26,7 +26,7 @@ The bot continuously monitors financial news feeds (RSS and Upstox API), filters
 
 *   **Core Language:** Python 3.12+ (PEP 8 standard, timezone-aware scheduling)
 *   **AI/NLP Engine:** Hugging Face Inference API hosting the **FinBERT** model (`ProsusAI/finbert`) for financial sentiment classification.
-*   **APIs & Feeds:** Upstox News API and financial RSS parsing (`feedparser`).
+*   **APIs & Feeds:** Financial RSS parsing (`feedparser`).
 *   **Data Sources:** Yahoo Finance (`yfinance`) for global indices and commodity snapshots.
 *   **Scraping:** BeautifulSoup4 & HTTPX for scraping trending sector listings.
 *   **Database:** SQLite (local instruments database) and JSON cache (MD5 deduplication).
@@ -36,7 +36,7 @@ The bot continuously monitors financial news feeds (RSS and Upstox API), filters
 
 ## 🔒 Security, Resilience & Integrity
 
-*   **Secrets Isolation:** Strictly segregates sensitive API tokens (Hugging Face, Upstox, Telegram) from the codebase using `.env` files. Secrets are actively blocked from Git via `.gitignore`.
+*   **Secrets Isolation:** Strictly segregates sensitive API tokens (Hugging Face, Telegram) from the codebase using `.env` files. Secrets are actively blocked from Git via `.gitignore`.
 *   **Least-Privilege Execution:** The systemd service is explicitly configured to run under a dedicated, non-root system user (`User=ubuntu`), minimizing the impact of potential remote code execution (RCE) vulnerabilities.
 *   **Self-Healing & Availability:** The background daemon is registered as a systemd service with `Restart=always` and `RestartSec=10` to automatically recover from system outages, network interruptions, or memory faults.
 *   **Sandbox Isolation:** Sandboxed within a Python Virtual Environment (`.venv`) to prevent library pollution or version conflicts with the host operating system.
