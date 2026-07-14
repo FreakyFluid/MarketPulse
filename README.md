@@ -1,6 +1,6 @@
 # MarketPulse 📈
 
-![MarketPulse Banner](marketpulse_lineart_v2.jpg)
+![MarketPulse Banner](marketpulse_lineart_v2_labeled.jpg)
 
 MarketPulse is a real-time corporate catalyst scanner and global macro market briefing daemon built for the Indian equity market (NSE). 
 
