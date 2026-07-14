@@ -8,7 +8,10 @@ The bot continuously monitors financial news feeds (RSS and Upstox API), filters
 
 ## 🚀 Key Features
 
-*   **Real-Time Headline Polling:** Continuous parsing of corporate and business feeds every 60 seconds.
+*   **Real-Time Headline Polling:** Continuous parsing of corporate, business, and regulatory feeds every 60 seconds, including:
+    *   **Financial Media:** MoneyControl (Markets & Business), Economic Times (Stocks & Markets), and Livemint (News & Markets).
+    *   **Exchange Disclosures:** NSE Corporate Actions, Board Meetings, Insider Trading, Circulars, and BSE Financial Results, Board Meetings, and Insider Trading.
+    *   **Regulatory Announcements:** Reserve Bank of India (RBI) Press Releases.
 *   **Rule-Based Catalyst Resolver:** A dynamic resolution cascade that translates raw headlines into concrete NSE stock symbols and sectors using a pre-compiled database of **1,896 stocks** across 60 sectors.
 *   **NLP Sentiment Classifier:** Classifies news sentiment (Positive/Negative) using a serverless deployment of the `ProsusAI/finbert` model hosted on the Hugging Face Inference API.
 *   **Time-Scheduled Briefings:** Broadcasts three daily reports on weekdays (Mon-Fri) containing essential indices and commodity snapshots (Brent, Gold, Silver, Copper, USD/INR):
